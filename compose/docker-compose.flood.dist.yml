@@ -1,0 +1,29 @@
+version: "3"
+services:
+  rtorrent:
+    image: looselyrigorous/rtorrent:0.2
+    volumes:
+      - "./downloads:/downloads"
+      - "./session:/session"
+      - "./watch:/watch"
+      - "./config:/config"
+      - "rtorrent-sock:/socket"
+    ports:
+      - "49161:49161"
+      - "49161:49161/udp"
+    environment:
+      - PUID=1000
+      - PGID=1000
+  flood:
+    # You should build the flood image yourself,
+    # as there is no official Docker Hub build.
+    # https://github.com/jfurrow/flood/wiki/Docker
+    build: ./flood-build
+    volumes:
+      - "rtorrent-sock:/data"
+    ports:
+      - "3000:3000"
+    environment:
+      - "RTORRENT_SOCK=true"
+volumes:
+  rtorrent-sock: {}

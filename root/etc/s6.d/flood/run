@@ -1,0 +1,3 @@
+#!/bin/sh
+cd ${FLOOD_DIR}
+exec npm start

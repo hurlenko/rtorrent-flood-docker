@@ -1,0 +1,26 @@
+#!/bin/sh
+PUID=${PUID:=0}
+PGID=${PGID:=0}
+
+# Copy over default config if none is provided
+if [ ! -f "/config/.rtorrent.rc" ]; then
+	echo "Copying default configuration to /config" >> /dev/stdout
+	cp /dist/.rtorrent.rc.dist /config/.rtorrent.rc
+fi
+# temporary todo: remove
+if [ -f "${FLOOD_DIR}/config.js" ]; then
+	cp /dist/config.js ${FLOOD_DIR}/config.js
+fi
+
+# Unconditionally remove session lock from previous instances
+rm -f /session/rtorrent.lock
+
+# chown rTorrent specific directories
+chown -R "$PUID:$PGID" /config /session /watch /socket /etc/s6.d
+# chown log "files" so rTorrent can open them
+chown "$PUID:$PGID" \
+	/var/log/rtorrent-error.log \
+	/var/log/rtorrent-info.log
+
+# exec su-exec $PUID:$PGID rtorrent -n -o import=/config/.rtorrent.rc
+exec su-exec $PUID:$PGID /bin/s6-svscan /etc/s6.d
